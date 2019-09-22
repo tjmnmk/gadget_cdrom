@@ -8,3 +8,6 @@ User=root
 WorkingDirectory=/opt/gadget_cdrom
 ExecStart=/opt/gadget_cdrom/gadget_cdrom.py
 Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
