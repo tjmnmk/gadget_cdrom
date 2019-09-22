@@ -1,0 +1,10 @@
+[Unit]
+Description=gadget_cdrom
+After=local-fs.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/gadget_cdrom
+ExecStart=/opt/gadget_cdrom/gadget_cdrom.py
+Restart=on-failure
