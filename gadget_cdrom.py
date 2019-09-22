@@ -184,6 +184,7 @@ class State:
     def remove_iso(self):
          assert(self._mode == MODE_CD)
 
+         self._iso_name = None
          script = os.path.join(APP_DIR, "remove_iso.sh")
          subprocess.check_call((script,))
 
