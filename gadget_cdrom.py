@@ -166,6 +166,7 @@ class State:
     def set_mode(self, mode):
         assert(mode in (MODE_CD, MODE_HDD))
         
+        self._iso_name = None
         if mode == MODE_CD:
             script = os.path.join(APP_DIR, "cd_mode.sh")
         elif mode == MODE_HDD:
