@@ -124,6 +124,7 @@ class State:
     def insert_iso(self):
         script = os.path.join(APP_DIR, "insert_iso.sh")
         iso_name = self.iso_ls()[self.get_iso_select()]
+        self._iso_name = iso_name
         subprocess.check_call((script, iso_name))
 
     def get_iso_select(self):
