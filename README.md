@@ -1,6 +1,6 @@
 # gadget_cdrom
 ## Requirements
-* Requires any Raspberry Pi 
+* Requires Raspberry Pi Zero (W) 
 * Waveshare 1.3inch OLED HAT (https://www.waveshare.com/wiki/1.3inch_OLED_HAT).
 * Raspbian buster
 
