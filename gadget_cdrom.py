@@ -122,6 +122,7 @@ class State:
         return self._iso_name
         
     def insert_iso(self):
+        self.remove_iso()
         script = os.path.join(APP_DIR, "insert_iso.sh")
         iso_name = self.iso_ls()[self.get_iso_select()]
         self._iso_name = iso_name
