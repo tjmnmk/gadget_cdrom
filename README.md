@@ -6,6 +6,7 @@
 
 ## Description
 * gadget_cdrom converts your Raspberry Pi to virtual usb cdrom.
+* https://video.ploud.fr/videos/watch/6d0b1014-bb39-4714-a984-15a24a9ac58e
 
 ## Usage
 * you can switch between HDD mode and virtual cdrom mode.
