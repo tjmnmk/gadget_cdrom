@@ -2,9 +2,8 @@
 # -*- coding:utf-8 -*-
 
 import os
+import logging
 import time
-import traceback
-import random
 import subprocess
 import spidev
 import RPi.GPIO as GPIO
@@ -15,7 +14,18 @@ APP_DIR = os.path.dirname(os.path.realpath(__file__))
 
 MODE_CD = "cd"
 MODE_HDD = "hdd"
+MODE_USB = "usb"
 
+ALL_MODES = [MODE_CD, MODE_HDD, MODE_USB]
+BROWSE_MODES = [MODE_CD, MODE_USB]
+
+FILE_EXTS = {
+    MODE_CD: "iso",
+    MODE_USB: "img",
+}
+
+logging.basicConfig(level=logging.DEBUG)
+LOGGER = logging.getLogger(__name__)
 
 class SH1106:
     def __init__(self):
@@ -117,20 +127,23 @@ class State:
         self._iso_name = None
         self._iso_ls_cache = None
         self.set_mode(MODE_CD)
-        
+
     def inserted_iso(self):
-        return self._iso_name
-        
+        if self._iso_name is not None:
+            return os.path.basename(self._iso_name)
+        return None
+
     def insert_iso(self):
         self.remove_iso()
         script = os.path.join(APP_DIR, "insert_iso.sh")
         iso_name = self.iso_ls()[self.get_iso_select()]
+        LOGGER.info("Inserting %s: %s", self._mode, iso_name)
         self._iso_name = iso_name
-        subprocess.check_call((script, iso_name))
+        subprocess.check_call((script, iso_name, self._mode))
 
     def get_iso_select(self):
         return self._iso_select
-        
+
     def set_iso_select(self, select):
         self._iso_select = select
 
@@ -145,50 +158,59 @@ class State:
             return False
         self._iso_select -= 1
         return True
-        
-    def iso_ls(self):
-        assert(self._mode == MODE_CD)
 
-        if self._iso_ls_cache:
-            return self._iso_ls_cache
-        
+    def iso_ls(self, paths=True):
+        if self._mode not in BROWSE_MODES:
+            raise Exception("invalid mode", self._mode)
+
+        if self._iso_ls_cache and self._iso_ls_cache_type == self._mode:
+            if paths:
+                return self._iso_ls_cache
+            return [os.path.basename(x) for x in self._iso_ls_cache]
+
         script = os.path.join(APP_DIR, "list_iso.sh")
-        output = subprocess.check_output((script,))
-        iso_list = output.decode().split("\n")
+        output = subprocess.check_output((script, FILE_EXTS[self._mode]))
+        iso_list = output.decode().split("\0")
         iso_list = sorted(filter(len, iso_list))
         if len(iso_list) < self._iso_select:
             self._iso_select = 0
+        self._iso_ls_cache_type = self._mode
         self._iso_ls_cache = iso_list
-        return iso_list
-        
+        if paths:
+            return iso_list
+        LOGGER.debug("isolist: %r", [os.path.basename(x) for x in self._iso_ls_cache])
+        return [os.path.basename(x) for x in self._iso_ls_cache]
+
     def get_mode(self):
         return self._mode
-        
+
     def set_mode(self, mode):
-        assert(mode in (MODE_CD, MODE_HDD))
-        
+        if mode not in ALL_MODES:
+            raise Exception("invalid mode", mode)
+
         self._iso_name = None
-        if mode == MODE_CD:
-            script = os.path.join(APP_DIR, "cd_mode.sh")
-        elif mode == MODE_HDD:
-            script = os.path.join(APP_DIR, "hdd_mode.sh")
-        subprocess.check_call([script])
+        script = os.path.join(APP_DIR, "mode.sh")
+        subprocess.check_call([script, mode])
         self._mode = mode
         self._iso_ls_cache = None
 
     def toogle_mode(self):
-        if self.get_mode() == MODE_CD:
+        mode = self.get_mode()
+        if mode == MODE_CD:
+            self.set_mode(MODE_USB)
+        elif mode == MODE_USB:
             self.set_mode(MODE_HDD)
         else:
             self.set_mode(MODE_CD)
         return self.get_mode()
 
     def remove_iso(self):
-         assert(self._mode == MODE_CD)
+        if self._mode not in BROWSE_MODES:
+            return
 
-         self._iso_name = None
-         script = os.path.join(APP_DIR, "remove_iso.sh")
-         subprocess.check_call((script,))
+        self._iso_name = None
+        script = os.path.join(APP_DIR, "remove_iso.sh")
+        subprocess.check_call((script,))
 
 
 class Display:
@@ -198,28 +220,29 @@ class Display:
         self._disp = disp
         self._font = ImageFont.truetype(FONT, 13)
         self._font_hdd = ImageFont.truetype(FONT, 52)
-            
+
     def refresh(self, state):
-        assert(state.get_mode() in (MODE_HDD, MODE_CD))
-        
+        if state.get_mode() not in ALL_MODES:
+            raise Exception("invalid mode", state.get_mode())
+
         image = Image.new('1', (self._disp.WIDTH_RES, self._disp.HEIGHT_RES), "WHITE")
         draw = ImageDraw.Draw(image)
-        
+
         if state.get_mode() == MODE_HDD:
             draw.text((0,0), "HDD", font=self._font_hdd)
             self._disp.display_image(image)
             return
-        
+
         iso_name = state.inserted_iso()
-        if iso_name == None:
+        if iso_name is None:
             iso_name = ""
-            
+
         iso_choice = ["", "", ""]
         iso_select = state.get_iso_select()
-        iso_ls = state.iso_ls()
-        
+        iso_ls = state.iso_ls(paths=False)
+
         if len(iso_ls) == 0:
-            iso_choice[1] = "    No ISO"
+            iso_choice[1] = "    No image"
         else:
             iso_choice[1] = ">" + iso_ls[iso_select]
             try:
@@ -231,8 +254,9 @@ class Display:
                 iso_choice[2] = " " + iso_ls[iso_select + 1]
             except IndexError:
                 pass
-        
-        draw.text((0,0), "CD " + iso_name, font = self._font)
+
+        mode_text = state.get_mode().upper()
+        draw.text((0,0), mode_text + " •" + iso_name, font = self._font)
         draw.text((0,15), iso_choice[0], font = self._font)
         draw.text((0,30), iso_choice[1], font = self._font)
         draw.text((0,45), iso_choice[2], font = self._font)
@@ -264,7 +288,7 @@ class WVSButtons:
                         return self.BUTTON_NAMES[pin]
                     except KeyError:
                         pass
-    
+
     KEY1 = 21
     KEY2 = 20
     KEY3 = 16
@@ -315,6 +339,7 @@ class Main:
                     f = self._BUTTON_FUNC[button]
                 except KeyError:
                     pass
+                LOGGER.debug("Pressed %s", button)
                 f()
                 self._display.refresh(self._state)
         finally:
@@ -333,13 +358,10 @@ class Main:
         self._state.insert_iso()
 
     def _button_umount(self):
-        if self._state.get_mode() != MODE_CD:
+        if self._state.get_mode() not in BROWSE_MODES:
             return
         self._state.remove_iso()
 
 
 if __name__ == "__main__":
     Main().main()
-
-
-
