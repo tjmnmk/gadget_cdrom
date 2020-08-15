@@ -4,10 +4,10 @@ iso="$1"
 MODE=${2:-cd}
 
 if ! mountpoint -q /iso; then
-  exit 1
+    exit 1
 fi
 if ! realpath "$1" |egrep "^/iso/"; then
-  exit 1
+    exit 1
 fi
 
 if [ "$MODE" == "cd" ] ; then

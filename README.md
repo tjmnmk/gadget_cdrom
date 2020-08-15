@@ -31,13 +31,12 @@ sudo apt install -y p7zip-full python3-rpi.gpio python3-smbus python3-spidev \
 ```
 
 ### Prepare storage
-```
-sudo fallocate -l 24G /iso.img  # creates a 24GB file
-sudo losetup /dev/loop0 /iso.img
-sudo mkfs.ntfs -Q /dev/loop0
-sudo losetup -d /dev/loop0
-sudo sync
-sudo mkdir /iso
+```sh
+# sudo ./create_image.sh
+Space available: 24G
+Size, e.g. 16G? 8G"
+Creating 8G image...
+Done!
 ```
 
 ### Load modules after boot
