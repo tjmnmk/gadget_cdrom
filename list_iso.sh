@@ -1,7 +1,9 @@
 #! /bin/bash -eu
 
 if ! mountpoint -q /iso; then
-  exit 1
+    exit 1
 fi
 
-find /iso -maxdepth 1 -type f -iname "*.iso" -printf "%f\n"
+EXT=${1:-iso}
+
+find /iso -type f -iname "*.$EXT" -not -path '*/.*' -print0
