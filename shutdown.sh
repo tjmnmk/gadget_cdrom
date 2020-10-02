@@ -1,4 +1,4 @@
 
 #! /bin/bash -eu
 
-/sbin/shutdown now
+/sbin/shutdown -h now
