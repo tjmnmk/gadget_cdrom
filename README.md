@@ -10,11 +10,10 @@
 
 ## Usage
 * You can switch between HDD mode, virtual cdrom mode, and virtual flash drive mode.
-* HDD mode - in that mode your Raspberry Pi is basically USB flash drive connected to your computer.
-* CD mode - in that mode you select some iso you uploaded to Raspberry Pi in
-  HDD mode, and the rpi will pretend to be that cdrom.
-* USB mode - the rpi will pretend to be a flash drive, presenting the usb .img
-  you selected.
+* HDD mode - Pi can be used as storage for CD .iso images or usb .img flash images.
+* CD mode - the rpi will pretend to be an optical drive, presenting the .iso image that you selected.
+* USB mode - the rpi will pretend to be a flash drive, presenting the usb .img that you selected.
+* Network mode - the rpi can be used as a USB network device (for now this needs configuration outside the scope of the current state of this project) 
 
 ### Keys
 * Key1 - Activate selected image
