@@ -336,7 +336,7 @@ class WVSButtons:
         KEY3 : "mode",
         J_UP : "up",
         J_DOWN : "down",
-        J_Press : "press"
+        J_PRESS : "press",
     }
 
 
