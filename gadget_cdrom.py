@@ -15,8 +15,9 @@ APP_DIR = os.path.dirname(os.path.realpath(__file__))
 MODE_CD = "cd"
 MODE_HDD = "hdd"
 MODE_USB = "usb"
+MODE_NET = "net"
 
-ALL_MODES = [MODE_CD, MODE_HDD, MODE_USB]
+ALL_MODES = [MODE_CD, MODE_HDD, MODE_NET, MODE_USB]
 BROWSE_MODES = [MODE_CD, MODE_USB]
 
 FILE_EXTS = {
@@ -200,6 +201,8 @@ class State:
             self.set_mode(MODE_USB)
         elif mode == MODE_USB:
             self.set_mode(MODE_HDD)
+        elif mode == MODE_NET:
+            self.set_mode(MODE_NET)
         else:
             self.set_mode(MODE_CD)
         return self.get_mode()
@@ -230,6 +233,11 @@ class Display:
 
         if state.get_mode() == MODE_HDD:
             draw.text((0,0), "HDD", font=self._font_hdd)
+            self._disp.display_image(image)
+            return
+
+        if state.get_mode() == MODE_NET:
+            draw.text((0,0), "<Network>", font=self._font_network)
             self._disp.display_image(image)
             return
 
