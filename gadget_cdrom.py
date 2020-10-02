@@ -240,7 +240,7 @@ class Display:
         draw = ImageDraw.Draw(image)
 
         if state.get_mode() == MODE_HDD:
-            draw.text((0,0), "HDD", font=self._font_hdd)
+            draw.text((0,0), "Storage", font=self._font_hdd)
             self._disp.display_image(image)
             return
 
