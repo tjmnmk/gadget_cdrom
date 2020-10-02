@@ -201,7 +201,7 @@ class State:
             self.set_mode(MODE_USB)
         elif mode == MODE_USB:
             self.set_mode(MODE_HDD)
-        elif mode == MODE_NET:
+        elif mode == MODE_HDD:
             self.set_mode(MODE_NET)
         else:
             self.set_mode(MODE_CD)
