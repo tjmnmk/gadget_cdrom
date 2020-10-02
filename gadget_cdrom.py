@@ -215,15 +215,6 @@ class State:
         script = os.path.join(APP_DIR, "remove_iso.sh")
         subprocess.check_call((script,))
 
-    def remove_net(self):
-        if self._mode not in BROWSE_MODES:
-            return
-
-        self._iso_name = None
-        script = os.path.join(APP_DIR, "remove_net.sh")
-        subprocess.check_call((script,))
-
-
 class Display:
     def __init__(self):
         disp = SH1106()
