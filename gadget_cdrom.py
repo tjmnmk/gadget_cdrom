@@ -229,8 +229,8 @@ class Display:
         disp = SH1106()
 
         self._disp = disp
-        self._font = ImageFont.truetype(FONT, 13)
-        self._font_hdd = ImageFont.truetype(FONT, 52)
+        self._font = ImageFont.truetype(FONT, 10)
+        self._font_hdd = ImageFont.truetype(FONT, 40)
 
     def refresh(self, state):
         if state.get_mode() not in ALL_MODES:
