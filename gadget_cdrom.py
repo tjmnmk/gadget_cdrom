@@ -195,14 +195,6 @@ class State:
         self._mode = mode
         self._iso_ls_cache = None
 
-    def shutdown(self):
-        if self.get_mode() == MODE_HDD:
-            subprocess.check_output(("sync",))
-        else:
-            self.remove_iso()
-        script = os.path.join(APP_DIR, "shutdown.sh")
-        subprocess.check_call((script,))
-
     def toogle_mode(self):
         mode = self.get_mode()
         if mode == MODE_CD:
@@ -354,7 +346,6 @@ class Main:
             "mount" : self._button_mount,
             "umount" : self._button_umount,
             "mode" : self._button_mode,
-            "press" : self._button_shutdown,
         }
 
     def main(self):
@@ -387,9 +378,6 @@ class Main:
         if self._state.get_mode() not in BROWSE_MODES:
             return
         self._state.remove_iso()
-
-    def _button_shutdown(self):
-        self._state.shutdown()
 
 if __name__ == "__main__":
     Main().main()
