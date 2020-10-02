@@ -29,16 +29,6 @@
 sudo apt install -y p7zip-full python3-rpi.gpio python3-smbus python3-spidev \
                     python3-numpy python3-pil fonts-dejavu ntfs-3g
 ```
-
-### Prepare storage
-```sh
-# sudo ./create_image.sh
-Space available: 24G
-Size, e.g. 16G? 8G"
-Creating 8G image...
-Done!
-```
-
 ### Load modules after boot
 * Add ```dtoverlay=dwc2``` to /boot/config.txt
 * Add ```dwc2``` to /etc/modules
@@ -60,6 +50,16 @@ sudo git clone https://github.com/tjmnmk/gadget_cdrom.git
 ```
 sudo ln -s /opt/gadget_cdrom/gadget_cdrom.service /etc/systemd/system/gadget_cdrom.service
 sudo systemctl enable gadget_cdrom.service
+```
+
+### Prepare storage
+This process prepares a loopback image to store the ISOs and USB images. Ideally, you want to make this as large as the items you will put on it.
+```sh
+# sudo ./create_image.sh
+Space available: 24G
+Size, e.g. 16G? 8G"
+Creating 8G image...
+Done!
 ```
 * reboot rpi
 ```
