@@ -250,7 +250,7 @@ class Display:
         iso_ls = state.iso_ls(paths=False)
 
         if len(iso_ls) == 0:
-            iso_choice[1] = "    No image"
+            iso_choice[1] = "    <No image>"
         else:
             iso_choice[1] = ">" + iso_ls[iso_select]
             try:
