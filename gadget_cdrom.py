@@ -237,7 +237,7 @@ class Display:
 
         if state.get_mode() == MODE_NET:
             ipinfo = subprocess.check_output("ip addr show up| grep -Po 'inet \K[\d.]+'", shell=True)
-            draw.text((0,0), "Network: " ipinfo, font=self._font_hdd)
+            draw.text((0,0), "Network: " +ipinfo, font=self._font_hdd)
             self._disp.display_image(image)
             return
 
