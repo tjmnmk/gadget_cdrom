@@ -245,7 +245,7 @@ class Display:
             return
 
         if state.get_mode() == MODE_NET:
-            draw.text((0,0), "Network", font=self._font_network)
+            draw.text((0,0), "Network", font=self._font_hdd)
             self._disp.display_image(image)
             return
 
