@@ -64,3 +64,8 @@ Done!
 ```
 sudo reboot
 ```
+## Known Issues
+### Unplugging while on hdd/Storage corrupts the /iso.img file
+* Work around this by selecting a read only mode like Network, USB, or CD - then unplug
+* Possible short term fixes would be to use ddrescue to rewrite a new file correcting any errors or ntfsfix to repair the file
+* Long term: Set a mode that would allow for a menu selection of utilities like shutdown which will run clean.sh then shutdown with a message indicating that it is safe to unplug
