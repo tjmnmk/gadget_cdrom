@@ -64,8 +64,8 @@ Done!
 ```
 sudo reboot
 ```
-## Known Issues
+## Troubleshooting
 ### Unplugging while on hdd/Storage corrupts the /iso.img file
-* Work around this by selecting a read only mode like Network, USB, or CD - then unplug
-* Possible short term fixes would be to use ddrescue to rewrite a new file correcting any errors or ntfsfix to repair the file
-* Long term: Set a mode that would allow for a menu selection of utilities like shutdown which will run clean.sh then shutdown with a message indicating that it is safe to unplug
+* Avoid doing this by ejecting the gadget from the connected operating system when you are done copying files 
+* To attempt a repair of the iso.img file: Try ddrescue to rewrite a new file correcting any errors or ntfsfix to repair the file
+* Start over with a new iso.img file: Delete the iso.img file, restart the pi, and run create_image.sh
