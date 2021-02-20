@@ -15,8 +15,9 @@ APP_DIR = os.path.dirname(os.path.realpath(__file__))
 MODE_CD = "cd"
 MODE_HDD = "hdd"
 MODE_USB = "usb"
+MODE_SHUTDOWN = "shutdown"
 
-ALL_MODES = [MODE_CD, MODE_HDD, MODE_USB]
+ALL_MODES = [MODE_CD, MODE_HDD, MODE_USB, MODE_SHUTDOWN]
 BROWSE_MODES = [MODE_CD, MODE_USB]
 
 FILE_EXTS = {
@@ -212,6 +213,14 @@ class State:
         script = os.path.join(APP_DIR, "remove_iso.sh")
         subprocess.check_call((script,))
 
+    def shutdown_prepare(self):
+        self.remove_iso()
+        self.set_mode(MODE_SHUTDOWN)
+
+    def shutdown(self):
+        script = os.path.join(APP_DIR, "shutdown.sh")
+        subprocess.check_call((script,))
+
 
 class Display:
     def __init__(self):
@@ -221,15 +230,17 @@ class Display:
         self._font = ImageFont.truetype(FONT, 13)
         self._font_hdd = ImageFont.truetype(FONT, 52)
 
+
     def refresh(self, state):
         if state.get_mode() not in ALL_MODES:
             raise Exception("invalid mode", state.get_mode())
 
+        mode_text = state.get_mode().upper()
         image = Image.new('1', (self._disp.WIDTH_RES, self._disp.HEIGHT_RES), "WHITE")
         draw = ImageDraw.Draw(image)
 
-        if state.get_mode() == MODE_HDD:
-            draw.text((0,0), "HDD", font=self._font_hdd)
+        if state.get_mode() in (MODE_HDD, MODE_SHUTDOWN):
+            draw.text((0,0), mode_text, font=self._font_hdd)
             self._disp.display_image(image)
             return
 
@@ -255,7 +266,6 @@ class Display:
             except IndexError:
                 pass
 
-        mode_text = state.get_mode().upper()
         draw.text((0,0), mode_text + " •" + iso_name, font = self._font)
         draw.text((0,15), iso_choice[0], font = self._font)
         draw.text((0,30), iso_choice[1], font = self._font)
@@ -312,6 +322,7 @@ class WVSButtons:
         KEY3 : "mode",
         J_UP : "up",
         J_DOWN : "down",
+        J_LEFT : "left",
     }
 
 
@@ -329,6 +340,7 @@ class Main:
             "mount" : self._button_mount,
             "umount" : self._button_umount,
             "mode" : self._button_mode,
+            "left" : self._button_shutdown,
         }
 
     def main(self):
@@ -358,10 +370,13 @@ class Main:
         self._state.insert_iso()
 
     def _button_umount(self):
-        if self._state.get_mode() not in BROWSE_MODES:
-            return
         self._state.remove_iso()
 
+    def _button_shutdown(self):
+        self._state.shutdown_prepare()
+        self._display.refresh(self._state)
+        self._state.shutdown()
+        
 
 if __name__ == "__main__":
     Main().main()
