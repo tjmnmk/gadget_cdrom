@@ -4,7 +4,7 @@ function set_config_txt {
     local key="$1"
     local value="$2"
 
-    if grep -q "${key}=" "${ROOTFS_DIR}/boot/config.txt"; then
+    if egrep -q "^${key}=" "${ROOTFS_DIR}/boot/config.txt"; then
         sed "s/${key}=.*/${key}=${value}/g" -i "${ROOTFS_DIR}/boot/config.txt"
     else
         echo >> "${ROOTFS_DIR}/boot/config.txt"
