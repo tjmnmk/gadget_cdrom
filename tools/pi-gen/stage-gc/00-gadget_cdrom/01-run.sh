@@ -25,5 +25,12 @@ echo dwc2 >> "${ROOTFS_DIR}/etc/modules"
 set_config_txt "dtoverlay" "dwc2"
 set_config_txt "dtparam=spi" "on"
 
-
-
+vmlinuz_fname=$(dpkg -c /pi-gen/stage-gc/00-gadget_cdrom/files/kernel_packages/linux-image-*_armhf.deb |grep ./boot/vmlinuz |awk -F"/" '{print $NF}')
+for i in /pi-gen/stage-gc/00-gadget_cdrom/files/kernel_packages/linux*.deb; do
+       install -m 644 "$i" "${ROOTFS_DIR}/root/"
+done
+on_chroot << EOF
+dpkg -i /root/linux*.deb
+EOF
+ 
+set_config_txt "kernel" "$vmlinuz_fname"
