@@ -22,8 +22,6 @@ EOF
 
 echo >> "${ROOTFS_DIR}/etc/modules"
 echo dwc2 >> "${ROOTFS_DIR}/etc/modules"
-echo g_acm_ms >> "${ROOTFS_DIR}/etc/modules"
-echo g_storage >> "${ROOTFS_DIR}/etc/modules"
 
 set_config_txt "dtoverlay" "dwc2"
 set_config_txt "dtparam=spi" "on"
