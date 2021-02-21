@@ -13,6 +13,4 @@ elif [ "$MODE" == "cd" ] ; then
     mount -o ro "$(losetup -PLf /iso.img --show)p1" /iso
 elif [ "$MODE" == "usb" ] ; then
     mount "$(losetup -PLf /iso.img --show)p1" /iso
-elif [ "$MODE" == "shutdown" ]; then
-    true
 fi

@@ -22,7 +22,6 @@
 * Key3 - Change mode
 * Joystick Down - next image
 * Joystick Up - previous image
-* Joystick Left - shutdown / power on
 
 ## Installation
 ### Install dependecies
