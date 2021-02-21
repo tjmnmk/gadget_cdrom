@@ -16,8 +16,7 @@ cd "${ROOTFS_DIR}/opt"
 git clone https://github.com/tjmnmk/gadget_cdrom.git
 
 on_chroot << EOF
-ln -s /opt/gadget_cdrom/gadget_cdrom_auto_img.service /etc/systemd/system/gadget_cdrom.service
-systemctl enable gadget_cdrom.service
+systemctl enable /opt/gadget_cdrom/gadget_cdrom_auto_img.service
 EOF
 
 echo >> "${ROOTFS_DIR}/etc/modules"
