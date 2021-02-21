@@ -9,7 +9,7 @@ FILE="/iso.img"
 
 if [ -f "$FILE" ]; then
     if [ "$auto" -eq 0 ]; then
-        echo "$FILE already exists"
+        echo "$FILE already exists" 1>&2
         exit 1
     fi
     exit 0

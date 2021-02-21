@@ -1,0 +1,4 @@
+IMG_NAME=gadget_cdrom
+RELEASE=buster
+USE_QCOW2=0
+STAGE_LIST="stage0 stage1 stage2 stage-gc"
