@@ -15,6 +15,11 @@ if [ -f "$FILE" ]; then
     exit 0
 fi
 
+if [ -f "/etc/init.d/resize2fs_once" ] && [ "$auto" -eq 1 ]; then # this is ugly hack :(
+    echo "/etc/init.d/resize2fs_once exists" 2>&1
+    exit 1
+fi
+
 size=0
 if [ "$auto" -eq 0 ]; then
     free="$(df -h / | tail -n1 | awk '{print $4}')"

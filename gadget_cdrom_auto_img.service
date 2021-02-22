@@ -1,7 +1,7 @@
 [Unit]
 Description=gadget_cdrom
 Before=basic.target
-After=local-fs.target sysinit.target resize2fs_once.service
+After=local-fs.target sysinit.target
 DefaultDependencies=no
 
 [Service]
