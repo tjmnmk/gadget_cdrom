@@ -26,7 +26,7 @@ vmlinuz_fname=$(dpkg -c /pi-gen/stage-gc/00-gadget_cdrom/files/kernel_packages/l
 for i in /pi-gen/stage-gc/00-gadget_cdrom/files/kernel_packages/linux*.deb; do
        install -m 644 "$i" "${ROOTFS_DIR}/root/"
 done
-install -m 755 "/pi-gen/stage-gc/00-gadget_cdrom/files/config.txt" "/boot/"
+install -m 755 "/pi-gen/stage-gc/00-gadget_cdrom/files/config.txt" "${ROOTFS_DIR}/boot/"
 on_chroot << EOF
 dpkg -i /root/linux*.deb
 EOF
