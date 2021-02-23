@@ -1,7 +1,8 @@
 [Unit]
 Description=gadget_cdrom
-After=local-fs.target
 Before=basic.target
+After=local-fs.target sysinit.target
+DefaultDependencies=no
 
 [Service]
 Type=simple

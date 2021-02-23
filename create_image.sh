@@ -9,10 +9,15 @@ FILE="/iso.img"
 
 if [ -f "$FILE" ]; then
     if [ "$auto" -eq 0 ]; then
-        echo "$FILE already exists"
+        echo "$FILE already exists" 1>&2
         exit 1
     fi
     exit 0
+fi
+
+if [ -f "/etc/init.d/resize2fs_once" ] && [ "$auto" -eq 1 ]; then # this is ugly hack :(
+    echo "/etc/init.d/resize2fs_once exists" 2>&1
+    exit 1
 fi
 
 size=0
