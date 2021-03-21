@@ -36,6 +36,11 @@ else
     size="${size}k"
     part_type=ntfs
 fi
+
+if [ "$part_type" != "ntfs" ] && [ "$part_type" != "fat32" ]; then
+    echo "$part_type is not supported, choose ntfs or fat32" 1>&2
+    exit 1
+fi
  
 echo "Creating $size image..."
 
@@ -50,7 +55,6 @@ elif [ "$part_type" = "fat32" ]; then
     mkfs.vfat "${dev}p1"
     fatlabel "${dev}p1" RPIHDD
 else
-    echo "$part_type is not supported, choose ntfs or fat32"
     exit 1
 fi
 
