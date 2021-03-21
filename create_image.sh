@@ -25,6 +25,8 @@ if [ "$auto" -eq 0 ]; then
     free="$(df -h / | tail -n1 | awk '{print $4}')"
     echo -ne "Space available: $free\nSize, e.g. 16G? "
     read size
+    echo -ne "Filesystem: ntfs and fat32 are supported? "
+    read part_type
 else
     free="$(df -k / | tail -n1 | awk '{print $4}')"
     size=$(($free-(1024*1024*2)))
@@ -39,8 +41,18 @@ echo "Creating $size image..."
 fallocate -l "$size" "$FILE"
 dev="$(losetup -fL --show "$FILE")"
 parted "$dev" mklabel msdos
-parted "$dev" mkpart p ntfs 1M 100%
-mkfs.ntfs -fL RPiHDD "${dev}p1"
+parted "$dev" mkpart p $part_type 1M 100%
+
+if [ "$part_type" = "ntfs" ]; then
+    mkfs.ntfs -fL RPiHDD "${dev}p1"
+elif [ "$part_type" = "fat32" ]; then
+    mkfs.vfat "${dev}p1"
+    fatlabel "${dev}p1" RPIHDD
+else
+    echo "$part_type is not supported, choose ntfs or fat32"
+    exit 1
+fi
+
 losetup -d "$dev"
 sync
 
