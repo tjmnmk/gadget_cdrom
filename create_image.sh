@@ -34,6 +34,7 @@ else
         size=$((free/2))
     fi
     size="${size}k"
+    part_type=ntfs
 fi
  
 echo "Creating $size image..."
