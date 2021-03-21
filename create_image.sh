@@ -34,7 +34,7 @@ else
         size=$((free/2))
     fi
     size="${size}k"
-    part_type=ntfs
+    part_type="ntfs"
 fi
 
 if [ "$part_type" != "ntfs" ] && [ "$part_type" != "fat32" ]; then
@@ -47,7 +47,7 @@ echo "Creating $size image..."
 fallocate -l "$size" "$FILE"
 dev="$(losetup -fL --show "$FILE")"
 parted "$dev" mklabel msdos
-parted "$dev" mkpart p $part_type 1M 100%
+parted "$dev" mkpart p "$part_type" 1M 100%
 
 if [ "$part_type" = "ntfs" ]; then
     mkfs.ntfs -fL RPiHDD "${dev}p1"
