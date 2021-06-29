@@ -1,6 +1,6 @@
 # gadget\_cdrom
 ## Requirements
-* Requires Raspberry Pi Zero (W)
+* Raspberry Pi Zero (W)
 * [Waveshare 1.3inch OLED HAT](https://www.waveshare.com/wiki/1.3inch_OLED_HAT)
 * Raspbian buster
 
@@ -21,9 +21,13 @@
 * Key3 - Change mode
 * Joystick Down - next image
 * Joystick Up - previous image
+* Joystick Left - shutdown / power on
+
+## Customized raspbian image
+There are customized raspbian images in the [releases section](https://github.com/tjmnmk/gadget_cdrom/), just [write it to sd-card](https://www.raspberrypi.org/documentation/installation/installing-images/), turn rpi on and wait a few minutes to get everything ready.
 
 ## Installation
-### Install dependecies
+### Install dependencies
 ```
 sudo apt install -y p7zip-full python3-rpi.gpio python3-smbus python3-spidev \
                     python3-numpy python3-pil fonts-dejavu ntfs-3g
@@ -64,8 +68,8 @@ Done!
 ```
 sudo reboot
 ```
-## Troubleshooting
-### Unplugging while on hdd/Storage corrupts the /iso.img file
-* Avoid doing this by ejecting the gadget from the connected operating system when you are done copying files 
-* To attempt a repair of the iso.img file: Try ddrescue to rewrite a new file correcting any errors or ntfsfix to repair the file
-* Start over with a new iso.img file: Delete the iso.img file, restart the pi, and run create_image.sh
+
+### Optional
+#### Recompile kernel for support isos bigger than ~2.5GB
+* Apply this [patch](../master/tools/kernel/00-remove_iso_limit.patch)
+* Build kernel: https://www.raspberrypi.org/documentation/linux/kernel/building.md
