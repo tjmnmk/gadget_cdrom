@@ -15,4 +15,6 @@ elif [ "$MODE" == "usb" ] ; then
     mount "$(losetup -PLf /iso.img --show)p1" /iso
 elif [ "$MODE" == "net" ] ; then
     modprobe g_ether
+elif [ "$MODE" == "shutdown" ]; then
+    true
 fi

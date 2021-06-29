@@ -8,6 +8,7 @@ DefaultDependencies=no
 Type=simple
 User=root
 WorkingDirectory=/opt/gadget_cdrom
+ExecStartPre=/opt/gadget_cdrom/create_image.sh auto
 ExecStart=/opt/gadget_cdrom/gadget_cdrom.py
 Restart=on-failure
 
