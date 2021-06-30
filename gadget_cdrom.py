@@ -250,6 +250,9 @@ class Display:
         if state.get_mode() == MODE_NET:
             ipinfo = subprocess.getoutput("ip addr show up| grep -Po 'inet \K[\d.]+'")
             draw.text((0,0), "Network: \n" +ipinfo, font=self._font)
+            self._disp.display_image(image)
+            return
+
         if state.get_mode() in (MODE_HDD, MODE_SHUTDOWN):
             draw.text((0,0), mode_text, font=self._font_hdd)
             self._disp.display_image(image)
