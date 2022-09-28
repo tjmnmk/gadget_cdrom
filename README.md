@@ -25,10 +25,11 @@
 * Joystick Up - previous image
 * Joystick Left - shutdown / power on
 
-## DietPi + gadget_cdrom image
+## RPI Images
+### DietPi + gadget_cdrom image
 There are customized DietPi images with gadget_cdrom and kernel patch for big isos in the [releases section](https://github.com/tjmnmk/gadget_cdrom/releases), just write it to sd-card (you can use rpi-imager, dd, etc.), turn rpi on and wait a few minutes to get everything ready.
 
-## Installation
+## Manual Installation
 ### Install dependencies
 ```
 sudo apt install -y p7zip-full python3-rpi.gpio python3-smbus python3-spidev \
