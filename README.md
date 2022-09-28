@@ -1,8 +1,8 @@
 # gadget\_cdrom
 ## Requirements
-* Raspberry Pi Zero (W)
+* Raspberry Pi Zero (2) (W)
 * [Waveshare 1.3inch OLED HAT](https://www.waveshare.com/wiki/1.3inch_OLED_HAT)
-* Raspbian buster
+* Tested on Rasberry Pi OS Buster, Bullseye and [DietPi](https://dietpi.com) Bullseye
 
 ## Description
 * gadget\_cdrom converts your Raspberry Pi to virtual usb cdrom.
@@ -25,8 +25,8 @@
 * Joystick Up - previous image
 * Joystick Left - shutdown / power on
 
-## Customized raspbian image
-There are customized raspbian images in the [releases section](https://github.com/tjmnmk/gadget_cdrom/), just [write it to sd-card](https://www.raspberrypi.org/documentation/installation/installing-images/), turn rpi on and wait a few minutes to get everything ready.
+## DietPi + gadget_cdrom image
+There are customized DietPi images with gadget_cdrom and kernel patch for big isos in the [releases section](https://github.com/tjmnmk/gadget_cdrom/releases), just write it to sd-card (you can use rpi-imager, dd, etc.), turn rpi on and wait a few minutes to get everything ready.
 
 ## Installation
 ### Install dependencies
