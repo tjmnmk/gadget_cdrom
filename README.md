@@ -29,6 +29,9 @@
 ### DietPi + gadget_cdrom image
 There are customized DietPi images with gadget_cdrom and kernel patch for big isos in the [releases section](https://github.com/tjmnmk/gadget_cdrom/releases), just write it to sd-card (you can use rpi-imager, dd, etc.), turn rpi on and wait a few minutes to get everything ready.
 
+### Banana Pi M2 Zero Image
+https://github.com/rzrbld/gadget_cdrom_bpi_m2_zero
+
 ## Manual Installation
 ### Install dependencies
 ```
