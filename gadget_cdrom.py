@@ -8,6 +8,7 @@ import subprocess
 import spidev
 import RPi.GPIO as GPIO
 from PIL import Image, ImageDraw, ImageFont
+import yaml
 
 FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
 APP_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -27,6 +28,27 @@ FILE_EXTS = {
 
 logging.basicConfig(level=logging.DEBUG)
 LOGGER = logging.getLogger(__name__)
+
+
+class Config:
+    def __init__(self):
+        self._config = {}
+    
+    def _load(self):
+        with open(os.path.join(APP_DIR, "config.yaml"), "r") as f:
+            self._config = yaml.safe_load(f)
+
+    def _save(self):
+        with open(os.path.join(APP_DIR, "config.yaml"), "w") as f:
+            yaml.safe_dump(self._config, f)
+
+    def get(self, key, default=None):
+        return self._config.get(key, default)
+    
+    def set(self, key, value):
+        self._config[key] = value
+        self._save()
+
 
 class SH1106:
     def __init__(self):
