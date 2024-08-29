@@ -1,8 +1,8 @@
 --
 WEB_INTERFACE_ENABLED: true
-WEB_PORT: 80
-WEB_HOST: "::"
-WEB_PASSWORD_PROTECTION: false
-WEB_USER: "admin"
-WEB_PASSWORD: "admin"
+WEB_INTERFACE_PORT: 9000
+WEB_INTERFACE_HOST: "::"
 
+UPLOAD_MODE_ENABLED: true
+FILEBROWSER_BIN: "filebrowser -a [::] -r /iso -p 9001 --disable-exec --noauth"
+FILEBROWSER_URL: "http://localhost:9001"
