@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 
 import yaml
+import os
 
 class Config:
     def __init__(self):
