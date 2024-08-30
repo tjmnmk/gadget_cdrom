@@ -5,8 +5,8 @@ import threading
 import os
 import errors_and_exceptions
 import const
+from common import get_app_dir, get_file_path
 
-APP_DIR = os.path.dirname(os.path.realpath(__file__))
 
 class WebApp(threading.Thread):
     def __init__(self, state, display, config):
@@ -28,12 +28,12 @@ class WebApp(threading.Thread):
                 iso_list = None
             mode = self._state.get_mode()
             inserted_iso = self._state.inserted_iso()
-            filebrowser_enable = self._config.get("FILEBROWSER_ENABLE", False)
+            filebrowser_enable = self._config.get("UPLOAD_MODE_ENABLED", False)
             filebrowser_url = self._config.get("FILEBROWSER_URL", None)
             browse_modes = mode in const.BROWSE_MODES
             upload_mode = mode == const.MODE_UPLOAD
 
-            return bottle.template(os.path.join(APP_DIR, "index.html.template"), 
+            return bottle.template(get_file_path("static/index.html.template"), 
                                iso_list=iso_list, 
                                mode=mode, 
                                all_modes=const.ALL_MODES,
@@ -80,13 +80,6 @@ class WebApp(threading.Thread):
             self._display.refresh(self._state)
             bottle.redirect('/')
 
-    def _filebrowser_redirect(self):
-        upload_mode_enable = self._config.get("UPLOAD_MODE_ENABLE", False)
-        assert(upload_mode_enable)
-        filebrowser_url = self._config.get("FILEBROWSER_URL", None)
-        assert(filebrowser_url)
-        bottle.redirect(filebrowser_url)
-
     def run(self):
         app = bottle.Bottle()
 
@@ -94,9 +87,9 @@ class WebApp(threading.Thread):
         app.route('/mode_change', method='POST', callback=self._mode_change)
         app.route('/insert_iso', method='POST', callback=self._insert_iso)
         app.route('/remove_iso', method='POST', callback=self._remove_iso)
-        app.route('/filebrowser_redirect', callback=self._filebrowser_redirect)
-        # style.css
-        app.route('/style.css', 'GET', lambda: bottle.static_file('style.css', root=APP_DIR))
+        app.route('/static/water-css/light.css', 'GET', lambda: bottle.static_file('static/water-css/light.css', root=get_app_dir()))
+        app.route('/static/style.css', 'GET', lambda: bottle.static_file('static/style.css', root=get_app_dir()))
+
 
         host = self._config.get("WEB_INTERFACE_HOST", "::")
         port = self._config.get("WEB_INTERFACE_PORT", 9000)
@@ -107,3 +100,49 @@ def start(state, display, config):
                      display,
                      config)
     web_app.start()
+
+
+# manual tests
+if __name__ == "__main__":
+    print("Running test server")
+    class State:
+        def __init__(self):
+            self._mode = const.MODE_CD
+            self._inserted_iso = "x.iso"
+
+        def get_mode(self):
+            return self._mode
+
+        def set_mode(self, mode):
+            self._mode = mode
+
+        def insert_iso(self, iso):
+            self._inserted_iso = iso
+
+        def inserted_iso(self):
+            return self._inserted_iso
+        
+        def iso_ls(self, paths=False):
+            return ["a.iso", "b.iso", "c.iso", "x.iso"]
+        
+        # fake with
+        def __enter__(self):
+            pass
+
+        def __exit__(self, type, value, traceback):
+            pass
+    
+    class Display:
+        def refresh(self, state):
+            print("Display refreshed")
+
+    from config import Config
+    import time
+    config = Config()
+    config.set("UPLOAD_MODE_ENABLED", True)
+    config.set("FILEBROWSER_URL", "http://localhost:8000")
+    state = State()
+    display = Display()
+    web_app = WebApp(state, display, config)
+    web_app.start()
+    time.sleep(10000)

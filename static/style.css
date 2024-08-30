@@ -1,0 +1,4 @@
+input:not([type='checkbox']):not([type='radio']),
+select, button, textarea {
+  -webkit-appearance: revert;
+}

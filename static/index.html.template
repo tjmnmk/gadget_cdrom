@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Gadget CD-ROM Interface</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="static/water-css/light.css">
+    <link rel="stylesheet" type="text/css" href="static/style.css">
 </head>
 <body>
     <h1>Gadget CD-ROM Interface</h1>
@@ -12,27 +13,33 @@
         <div class="error">{{error}}</div>
     % end
 
-    <h2>Current Mode: {{mode}}</h2>
-
-    <h2>Inserted Image: {{inserted_iso}}</h2>
-
-    <h2>Change Mode</h2>
+    <h2>Mode</h2>
+    <p>Current Mode: {{mode}}</p>
     <form action="/mode_change" method="post">
         <select name="mode">
-            % for mode in all_modes:
-                <option value="{{mode}}">{{mode}}</option>
+            % for modei in all_modes:
+                <option value="{{modei}}" 
+                % if modei == mode: 
+                selected="selected" 
+                % end
+                >{{modei}}</option>
             % end
         </select>
         <input type="submit" value="Change Mode">
     </form>
 
     % if browse_modes:
-    <h2>Insert Image</h2>
+    <h2>Image</h2>
+    <p>Current Image: {{inserted_iso}}</p>
     <form action="/insert_iso" method="post">
         <select name="iso">
             % if iso_list:
                 % for iso in iso_list:
-                    <option value="{{iso}}">{{iso}}</option>
+                    <option value="{{iso}}" 
+                    % if iso == inserted_iso: 
+                    selected="selected" 
+                    % end
+                    >{{iso}}</option>
                 % end
             % else:
                 <option value="">No Images available</option>
@@ -40,12 +47,8 @@
         </select>
         <input type="submit" value="Insert Images">
     </form>
-    % end
-
-    % if browse_modes:
-    <h2>Remove Image</h2>
     <form action="/remove_iso" method="post">
-        <input type="submit" value="Remove Image">
+        <input type="submit" value="Unmount Image">
     </form>
     % end
 

@@ -13,41 +13,12 @@ import web_interface
 import threading
 import errors_and_exceptions
 from const import MODE_CD, MODE_USB, MODE_HDD, MODE_SHUTDOWN, ALL_MODES, BROWSE_MODES, FILE_EXTS, MODE_UPLOAD, MODE_INFO
+from config import Config
+from common import get_app_dir
 
-
-APP_DIR = os.path.dirname(os.path.realpath(__file__))
 
 logging.basicConfig(level=logging.DEBUG)
 LOGGER = logging.getLogger(__name__)
-
-
-class Config:
-    def __init__(self):
-        self._config = {}
-    
-    def _load(self):
-        with open(os.path.join(APP_DIR, "config.yaml"), "r") as f:
-            self._config = yaml.safe_load(f)
-        # disable upload mode if web interface is disabled
-        if not self.get("WEB_INTERFACE_ENABLED", False):
-            self.set("UPLOAD_MODE_ENABLED", False)
-        # set filebrowser to true if upload is disabled
-        if not self.get("UPLOAD_MODE_ENABLED", False):
-            self.set("FILEBROWSER_BIN", True)
-        # disable UPLOAD_MODE_DISPLAY_TOOGLE if upload mode is disabled
-        if not self.get("UPLOAD_MODE_ENABLED", False):
-            self.set("UPLOAD_MODE_DISPLAY_TOOGLE", False)
-
-    """def _save(self):
-        with open(os.path.join(APP_DIR, "config.yaml"), "w") as f:
-            yaml.safe_dump(self._config, f)"""
-
-    def get(self, key, default=None):
-        return self._config.get(key, default)
-    
-    def set(self, key, value):
-        self._config[key] = value
-        self._save()
 
 
 class SH1106:
@@ -158,7 +129,7 @@ class State:
 
     def _clean(self):
         # call clean.sh
-        script = os.path.join(APP_DIR, "clean.sh")
+        script = os.path.join(get_app_dir(), "clean.sh")
         subprocess.call((script,))
 
     def clean(self):
@@ -185,7 +156,7 @@ class State:
             raise errors_and_exceptions.InvalidMode("invalid mode", self._mode)
         
         self.remove_iso()
-        script = os.path.join(APP_DIR, "insert_iso.sh")
+        script = os.path.join(get_app_dir(), "insert_iso.sh")
         try:
             iso_name = self.iso_ls()[self.get_iso_select()]
         except IndexError:
@@ -231,7 +202,7 @@ class State:
                 return self._iso_ls_cache
             return [os.path.basename(x) for x in self._iso_ls_cache]
 
-        script = os.path.join(APP_DIR, "list_iso.sh")
+        script = os.path.join(get_app_dir(), "list_iso.sh")
         output = subprocess.check_output((script, FILE_EXTS[self._mode]))
         iso_list = output.decode().split("\0")
         iso_list = sorted(filter(len, iso_list))
@@ -260,7 +231,7 @@ class State:
             raise errors_and_exceptions.InvalidMode("disabled mode", mode)
 
         self._iso_name = None
-        script = os.path.join(APP_DIR, "mode.sh")
+        script = os.path.join(get_app_dir(), "mode.sh")
         filebrowser_bin = self._config.get("FILEBROWSER_BIN", "true")
         subprocess.check_call([script, mode, filebrowser_bin])
         self._mode = mode
@@ -290,7 +261,7 @@ class State:
             return
 
         self._iso_name = None
-        script = os.path.join(APP_DIR, "remove_iso.sh")
+        script = os.path.join(get_app_dir(), "remove_iso.sh")
         subprocess.check_call((script,))
 
     def shutdown_prepare(self):
@@ -301,7 +272,7 @@ class State:
         self._clean()
 
     def shutdown(self):
-        script = os.path.join(APP_DIR, "shutdown.sh")
+        script = os.path.join(get_app_dir(), "shutdown.sh")
         subprocess.check_call((script,))
 
     def __enter__(self):
