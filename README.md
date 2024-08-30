@@ -1,6 +1,6 @@
 # gadget\_cdrom
 ## Requirements
-* Raspberry Pi Zero (2) (W)
+* Raspberry Pi Zero (2) (W) or Raspberry Pi 4 (Not tested!)
 * [Waveshare 1.3inch OLED HAT](https://www.waveshare.com/wiki/1.3inch_OLED_HAT)
 * Tested on Rasberry Pi OS Buster, Bullseye and [DietPi](https://dietpi.com) Bullseye
 
