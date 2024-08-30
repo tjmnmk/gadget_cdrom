@@ -114,7 +114,6 @@ class SH1106:
     )
 
 
-# todo: use run_script and get_file_path from common.py
 class State:
     def __init__(self):
         self._iso_select = 0
@@ -439,7 +438,8 @@ class Main:
             self._state.clean()
             # kill myself because of unstoppable bottle server
             # todo: find better solution
-            os.kill(os.getpid(), 9)
+            # todo: probably not needed, test it
+            # os.kill(os.getpid(), 9)
 
     def _button_up(self):
         self._state.set_iso_select_prev()
