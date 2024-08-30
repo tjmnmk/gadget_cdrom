@@ -12,10 +12,9 @@ import yaml
 import web_interface
 import threading
 import errors_and_exceptions
-from const import MODE_CD, MODE_USB, MODE_HDD, MODE_SHUTDOWN, ALL_MODES, BROWSE_MODES, FILE_EXTS, MODE_UPLOAD
+from const import MODE_CD, MODE_USB, MODE_HDD, MODE_SHUTDOWN, ALL_MODES, BROWSE_MODES, FILE_EXTS, MODE_UPLOAD, MODE_INFO
 
 
-FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
 APP_DIR = os.path.dirname(os.path.realpath(__file__))
 
 logging.basicConfig(level=logging.DEBUG)
@@ -35,10 +34,13 @@ class Config:
         # set filebrowser to true if upload is disabled
         if not self.get("UPLOAD_MODE_ENABLED", False):
             self.set("FILEBROWSER_BIN", True)
+        # disable UPLOAD_MODE_DISPLAY_TOOGLE if upload mode is disabled
+        if not self.get("UPLOAD_MODE_ENABLED", False):
+            self.set("UPLOAD_MODE_DISPLAY_TOOGLE", False)
 
-    def _save(self):
+    """def _save(self):
         with open(os.path.join(APP_DIR, "config.yaml"), "w") as f:
-            yaml.safe_dump(self._config, f)
+            yaml.safe_dump(self._config, f)"""
 
     def get(self, key, default=None):
         return self._config.get(key, default)
@@ -149,15 +151,36 @@ class State:
         self._iso_ls_cache = None
         self.set_mode(MODE_CD)
         self._config = Config()
-
         self._state_lock = threading.RLock()
+        self._cleaned = False
+
+        self._clean()
+
+    def _clean(self):
+        # call clean.sh
+        script = os.path.join(APP_DIR, "clean.sh")
+        subprocess.call((script,))
+
+    def clean(self):
+        self._cleaned = True
+        self._clean()
+
+    def lock(self):
+        self._state_lock.acquire()
+
+    def unlock(self):
+        self._state_lock.release()
 
     def inserted_iso(self):
+        assert(self._cleaned == False)
+
         if self._iso_name is not None:
             return os.path.basename(self._iso_name)
         return None
 
     def insert_iso(self):
+        assert(self._cleaned == False)
+
         if self._mode not in BROWSE_MODES:
             raise errors_and_exceptions.InvalidMode("invalid mode", self._mode)
         
@@ -172,24 +195,34 @@ class State:
         subprocess.check_call((script, iso_name, self._mode))
 
     def get_iso_select(self):
+        assert(self._cleaned == False)
+
         return self._iso_select
 
     def set_iso_select(self, select):
+        assert(self._cleaned == False)
+
         self._iso_select = select
 
     def set_iso_select_next(self):
+        assert(self._cleaned == False)
+
         if self._iso_select == len(self.iso_ls()) - 1:
             return False
         self._iso_select += 1
         return True
 
     def set_iso_select_prev(self):
+        assert(self._cleaned == False)
+
         if self._iso_select == 0:
             return False
         self._iso_select -= 1
         return True
 
     def iso_ls(self, paths=True):
+        assert(self._cleaned == False)
+
         if self._mode not in BROWSE_MODES:
             raise errors_and_exceptions.InvalidMode("invalid mode", self._mode)
 
@@ -212,11 +245,19 @@ class State:
         return [os.path.basename(x) for x in self._iso_ls_cache]
 
     def get_mode(self):
+        assert(self._cleaned == False)
+
         return self._mode
 
     def set_mode(self, mode):
+        assert(self._cleaned == False)
+
         if mode not in ALL_MODES:
             raise errors_and_exceptions.InvalidMode("invalid mode", mode)
+        if mode == MODE_UPLOAD and not self._config.get("UPLOAD_MODE_ENABLED", False):
+            raise errors_and_exceptions.InvalidMode("disabled mode", mode)
+        if mode == MODE_INFO and not self._config.get("INFO_MODE_ENABLED", False):
+            raise errors_and_exceptions.InvalidMode("disabled mode", mode)
 
         self._iso_name = None
         script = os.path.join(APP_DIR, "mode.sh")
@@ -226,18 +267,25 @@ class State:
         self._iso_ls_cache = None
 
     def toogle_mode(self):
+        assert(self._cleaned == False)
+
+        # todo: refactor
         mode = self.get_mode()
         if mode == MODE_CD:
             self.set_mode(MODE_USB)
         elif mode == MODE_USB:
             self.set_mode(MODE_HDD)
-        elif mode == MODE_HDD:
+        elif mode == MODE_HDD and self._config.get("UPLOAD_MODE_DISPLAY_TOOGLE", False):
             self.set_mode(MODE_UPLOAD)
+        elif self._config.get("INFO_MODE_ENABLED", False) and (mode == MODE_HDD or mode == MODE_UPLOAD):
+            self.set_mode(MODE_INFO)
         else:
             self.set_mode(MODE_CD)
         return self.get_mode()
 
     def remove_iso(self):
+        assert(self._cleaned == False)
+
         if self._mode not in BROWSE_MODES:
             return
 
@@ -246,12 +294,22 @@ class State:
         subprocess.check_call((script,))
 
     def shutdown_prepare(self):
+        assert(self._cleaned == False)
+
         self.remove_iso()
         self.set_mode(MODE_SHUTDOWN)
+        self._clean()
 
     def shutdown(self):
         script = os.path.join(APP_DIR, "shutdown.sh")
         subprocess.check_call((script,))
+
+    def __enter__(self):
+        self.lock()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.unlock()
 
 
 class Display:
@@ -259,58 +317,67 @@ class Display:
         disp = SH1106()
 
         self._disp = disp
-        self._font = ImageFont.truetype(FONT, 13)
-        self._font_hdd = ImageFont.truetype(FONT, 36)
-
-        self._display_lock = threading.Lock()
-
+        # get font from config
+        font = Config().get("FONT", "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf")
+        self._font = ImageFont.truetype(font, 13)
+        self._font_state_big = ImageFont.truetype(font, 36)
 
     def refresh(self, state):
-        with self._display_lock:
-            if state.get_mode() not in ALL_MODES:
-                raise errors_and_exceptions.InvalidMode("invalid mode", state.get_mode())
+        if state.get_mode() not in ALL_MODES:
+            raise errors_and_exceptions.InvalidMode("invalid mode", state.get_mode())
 
-            mode_text = state.get_mode().upper()
-            image = Image.new('1', (self._disp.WIDTH_RES, self._disp.HEIGHT_RES), "WHITE")
-            draw = ImageDraw.Draw(image)
+        mode_text = state.get_mode().upper()
+        image = Image.new('1', (self._disp.WIDTH_RES, self._disp.HEIGHT_RES), "WHITE")
+        draw = ImageDraw.Draw(image)
 
-            if state.get_mode() in (MODE_HDD, MODE_SHUTDOWN, MODE_UPLOAD):
-                draw.text((0,0), mode_text, font=self._font_hdd)
-                self._disp.display_image(image)
-                return
-
-            iso_name = state.inserted_iso()
-            if iso_name is None:
-                iso_name = ""
-
-            iso_choice = ["", "", ""]
-            iso_select = state.get_iso_select()
-            iso_ls = state.iso_ls(paths=False)
-
-            if len(iso_ls) == 0:
-                iso_choice[1] = "    No image"
-            else:
-                iso_choice[1] = ">" + iso_ls[iso_select]
-                try:
-                    if iso_select > 0:
-                        iso_choice[0] = " " + iso_ls[iso_select - 1]
-                except IndexError:
-                    pass
-                try:
-                    iso_choice[2] = " " + iso_ls[iso_select + 1]
-                except IndexError:
-                    pass
-
-            draw.text((0,0), mode_text + " •" + iso_name, font = self._font)
-            draw.text((0,15), iso_choice[0], font = self._font)
-            draw.text((0,30), iso_choice[1], font = self._font)
-            draw.text((0,45), iso_choice[2], font = self._font)
+        if state.get_mode() in (MODE_HDD, MODE_SHUTDOWN, MODE_UPLOAD):
+            draw.text((0,0), mode_text, font=self._font_state_big)
             self._disp.display_image(image)
+            return
+        
+        if state.get_mode() == MODE_INFO:
+            info_message = self._config.get("INFO_MESSAGE", [])
+            draw.text((0,0), mode_text, font=self._font)
+            try:
+                draw.text((0,15), info_message[0], font=self._font)
+                draw.text((0,30), info_message[1], font=self._font)
+                draw.text((0,45), info_message[2], font=self._font)
+            except IndexError:
+                pass
+            self._disp.display_image(image)
+            return
+
+        iso_name = state.inserted_iso()
+        if iso_name is None:
+            iso_name = ""
+
+        iso_choice = ["", "", ""]
+        iso_select = state.get_iso_select()
+        iso_ls = state.iso_ls(paths=False)
+
+        if len(iso_ls) == 0:
+            iso_choice[1] = "    No image"
+        else:
+            iso_choice[1] = ">" + iso_ls[iso_select]
+            try:
+                if iso_select > 0:
+                    iso_choice[0] = " " + iso_ls[iso_select - 1]
+            except IndexError:
+                pass
+            try:
+                iso_choice[2] = " " + iso_ls[iso_select + 1]
+            except IndexError:
+                pass
+
+        draw.text((0,0), mode_text + " •" + iso_name, font = self._font)
+        draw.text((0,15), iso_choice[0], font = self._font)
+        draw.text((0,30), iso_choice[1], font = self._font)
+        draw.text((0,45), iso_choice[2], font = self._font)
+        self._disp.display_image(image)
 
     def clear(self):
-        with self._display_lock:
-            image = Image.new('1', (self._disp.WIDTH_RES, self._disp.HEIGHT_RES), "WHITE")
-            self._disp.display_image(image)
+        image = Image.new('1', (self._disp.WIDTH_RES, self._disp.HEIGHT_RES), "WHITE")
+        self._disp.display_image(image)
 
 
 class WVSButtons:
@@ -382,25 +449,30 @@ class Main:
 
     def main(self):
         if self._config.get("WEB_INTERFACE_ENABLED", False):
-            web_host = self._config.get("WEB_INTERFACE_HOST", "::")
-            web_port = self._config.get("WEB_INTERFACE_PORT", 9000)
-            upload_mode = self._config.get("UPLOAD_MODE_ENABLED", False)
-            web_interface.start(self._state, self._display, web_host, web_port, upload_mode)
+            web_interface.start(self._state, 
+                                self._display,
+                                self._config)
         try:
             while True:
                 button = self._buttons.wait_on_button()
-                try:
-                    f = self._BUTTON_FUNC[button]
-                except KeyError:
-                    pass
                 LOGGER.debug("Pressed %s", button)
-                try:
-                    f()
-                except errors_and_exceptions.InvalidMode as e:
-                    LOGGER.error("Invalid mode: %s", e)
-                self._display.refresh(self._state)
+                with self._state:
+                    try:
+                        f = self._BUTTON_FUNC[button]
+                    except KeyError:
+                        continue
+                    try:
+                        f()
+                    except errors_and_exceptions.InvalidMode as e:
+                        LOGGER.error("Invalid mode: %s", e)
+                    self._display.refresh(self._state)
         finally:
             self._display.clear()
+            # call clean.sh
+            self._state.clean()
+            # kill myself because of unstoppable bottle server
+            # todo: find better solution
+            os.kill(os.getpid(), 9)
 
     def _button_up(self):
         self._state.set_iso_select_prev()

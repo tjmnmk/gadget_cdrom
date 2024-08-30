@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gadget CD-ROM Interface</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+    <h1>Gadget CD-ROM Interface</h1>
+
+    % if error:
+        <div class="error">{{error}}</div>
+    % end
+
+    <h2>Current Mode: {{mode}}</h2>
+
+    <h2>Inserted Image: {{inserted_iso}}</h2>
+
+    <h2>Change Mode</h2>
+    <form action="/mode_change" method="post">
+        <select name="mode">
+            % for mode in all_modes:
+                <option value="{{mode}}">{{mode}}</option>
+            % end
+        </select>
+        <input type="submit" value="Change Mode">
+    </form>
+
+    % if browse_modes:
+    <h2>Insert Image</h2>
+    <form action="/insert_iso" method="post">
+        <select name="iso">
+            % if iso_list:
+                % for iso in iso_list:
+                    <option value="{{iso}}">{{iso}}</option>
+                % end
+            % else:
+                <option value="">No Images available</option>
+            % end
+        </select>
+        <input type="submit" value="Insert Images">
+    </form>
+    % end
+
+    % if browse_modes:
+    <h2>Remove Image</h2>
+    <form action="/remove_iso" method="post">
+        <input type="submit" value="Remove Image">
+    </form>
+    % end
+
+     % if filebrowser_enable:
+        <h2>File Browser</h2>
+        % if upload_mode:
+            <a href="{{filebrowser_url}}" target="_blank">Open File Browser</a>
+        % else:
+            <a href="#" onclick="alert('Change mode to web-upload first.'); return false;">Open File Browser</a>
+        % end
+    % end
+
+</body>
+</html>

@@ -1,8 +1,14 @@
 --
-WEB_INTERFACE_ENABLED: true
+WEB_INTERFACE_ENABLED: false
 WEB_INTERFACE_PORT: 9000
 WEB_INTERFACE_HOST: "::"
 
-UPLOAD_MODE_ENABLED: true
+UPLOAD_MODE_ENABLED: false
+UPLOAD_MODE_DISPLAY_TOOGLE: false
 FILEBROWSER_BIN: "filebrowser -a [::] -r /iso -p 9001 --disable-exec --noauth"
 FILEBROWSER_URL: "http://localhost:9001"
+
+INFO_MODE_ENABLED: false
+INFO_MESSAGE: [ "gadget_cdrom v1.1.0", "http://192.168.0.1:9000/", "SSID: gadgetcdrom" ]
+
+FONT: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
