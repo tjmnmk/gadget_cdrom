@@ -1,14 +1,14 @@
 # -*- coding:utf-8 -*-
 
 import yaml
-import os
+from common import get_file_path
 
 class Config:
     def __init__(self):
         self._config = {}
     
     def _load(self):
-        with open(os.path.join(APP_DIR, "config.yaml"), "r") as f:
+        with open(get_file_path("config.yaml"), "r") as f:
             self._config = yaml.safe_load(f)
         # disable upload mode if web interface is disabled
         if not self.get("WEB_INTERFACE_ENABLED", False):
