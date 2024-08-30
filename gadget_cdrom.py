@@ -14,7 +14,7 @@ import threading
 import errors_and_exceptions
 from const import MODE_CD, MODE_USB, MODE_HDD, MODE_SHUTDOWN, ALL_MODES, BROWSE_MODES, FILE_EXTS, MODE_UPLOAD, MODE_INFO
 from config import Config
-from common import get_app_dir
+from common import get_app_dir, run_script, get_script_path
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -114,6 +114,7 @@ class SH1106:
     )
 
 
+# todo: use run_script and get_file_path from common.py
 class State:
     def __init__(self):
         self._iso_select = 0
@@ -129,8 +130,7 @@ class State:
 
     def _clean(self):
         # call clean.sh
-        script = os.path.join(get_app_dir(), "clean.sh")
-        subprocess.call((script,))
+        run_script("clean.sh")
 
     def clean(self):
         self._cleaned = True
@@ -156,14 +156,13 @@ class State:
             raise errors_and_exceptions.InvalidMode("invalid mode", self._mode)
         
         self.remove_iso()
-        script = os.path.join(get_app_dir(), "insert_iso.sh")
         try:
             iso_name = self.iso_ls()[self.get_iso_select()]
         except IndexError:
             raise errors_and_exceptions.ImageNotFound(self._iso_select)
         LOGGER.info("Inserting %s: %s", self._mode, iso_name)
         self._iso_name = iso_name
-        subprocess.check_call((script, iso_name, self._mode))
+        run_script("insert_iso.sh", iso_name, self._mode)
 
     def get_iso_select(self):
         assert(self._cleaned == False)
@@ -202,7 +201,7 @@ class State:
                 return self._iso_ls_cache
             return [os.path.basename(x) for x in self._iso_ls_cache]
 
-        script = os.path.join(get_app_dir(), "list_iso.sh")
+        script = get_script_path("list_iso.sh")
         output = subprocess.check_output((script, FILE_EXTS[self._mode]))
         iso_list = output.decode().split("\0")
         iso_list = sorted(filter(len, iso_list))
@@ -231,9 +230,8 @@ class State:
             raise errors_and_exceptions.InvalidMode("disabled mode", mode)
 
         self._iso_name = None
-        script = os.path.join(get_app_dir(), "mode.sh")
         filebrowser_bin = self._config.get("FILEBROWSER_BIN", "true")
-        subprocess.check_call([script, mode, filebrowser_bin])
+        run_script("mode.sh", mode, filebrowser_bin)
         self._mode = mode
         self._iso_ls_cache = None
 
@@ -261,8 +259,7 @@ class State:
             return
 
         self._iso_name = None
-        script = os.path.join(get_app_dir(), "remove_iso.sh")
-        subprocess.check_call((script,))
+        run_script("remove_iso.sh")
 
     def shutdown_prepare(self):
         assert(self._cleaned == False)
@@ -272,8 +269,7 @@ class State:
         self._clean()
 
     def shutdown(self):
-        script = os.path.join(get_app_dir(), "shutdown.sh")
-        subprocess.check_call((script,))
+        run_script("shutdown.sh")
 
     def __enter__(self):
         self.lock()
