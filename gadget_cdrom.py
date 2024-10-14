@@ -137,7 +137,12 @@ class State:
     def insert_iso(self):
         self.remove_iso()
         script = os.path.join(APP_DIR, "insert_iso.sh")
-        iso_name = self.iso_ls()[self.get_iso_select()]
+        iso_list = self.iso_ls()
+        if not iso_list:
+            LOGGER.error("No ISO available.")
+            return
+        
+        iso_name = iso_list[self.get_iso_select()]
         LOGGER.info("Inserting %s: %s", self._mode, iso_name)
         self._iso_name = iso_name
         subprocess.check_call((script, iso_name, self._mode))
